@@ -1,0 +1,36 @@
+{
+  "uHDR TAGS": [
+    {
+      "scoring": {
+        "*     (1)": null,
+        "**    (2)": null,
+        "***   (3)": null,
+        "****  (4)": null,
+        "***** (5)": null
+      }
+    },
+    {
+      "scene": {
+        "landscape": null,
+        "seaside" : null,
+        "cityscape": null,
+        "architecture": null,
+        "interiors" : null,
+        "still life": null,
+        "portrait": null,
+        "event": null
+      }
+    },
+
+    {
+      "light mood": {
+        "night": null,
+        "dark": null,
+        "soft (indoor)": null,
+        "soft (outdoor)": null,
+        "bright": null,
+        "very bright": null
+      }
+    }
+  ]
+}

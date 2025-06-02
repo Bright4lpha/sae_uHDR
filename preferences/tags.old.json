@@ -1,0 +1,38 @@
+{
+  "hdr-use-case": [
+    {
+      "inside": {
+        "Window with view on bright outdoor": null,
+        "High Contrast and illuminants tend to be over-exposed": null,
+        "Backlit portrait": null
+      }
+    },
+    {
+      "outside": {
+        "Sun in the frame": null,
+        "Backlight": null,
+        "Shadow and direct lighting": null,
+        "Backlit portrait": null,
+        "Nature": null,
+        "Quite LDR": null
+      }
+    },
+    {
+      "lowlight": {
+        "Portrait": null,
+        "Outside with bright illuminants": null,
+        "Cityscape": null,
+        "Event": null
+      }
+    },
+    {
+      "special": {
+        "Shiny object  and specular highlights": null,
+        "Memory colors": null,
+        "Scene with color checker or gray chart": null,
+        "Translucent objects and stained glass": null,
+        "Traditional tone mapping failing cases": null
+      }
+    }
+  ]
+}
