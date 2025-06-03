@@ -963,8 +963,8 @@ class ToneCurveView(QFrame):
         # shadows
         self.labelShadows = QLabel("shadows")
         self.sliderShadows = QSlider(Qt.Horizontal)
-        self.sliderShadows.setRange(0,100)
-        self.sliderShadows.setValue(int(self.controller.model.default['shadows'][1]))
+        self.sliderShadows.setRange(0,10000)
+        self.sliderShadows.setValue(int(self.controller.model.default['shadows'][1]) * 100)
         self.editShadows = QLineEdit()
         self.editShadows.setText(str(self.controller.model.default['shadows'][1]))
         self.resetShadows = QPushButton("reset")
@@ -976,8 +976,8 @@ class ToneCurveView(QFrame):
         # blacks
         self.labelBlacks = QLabel("  blacks  ")
         self.sliderBlacks = QSlider(Qt.Horizontal)
-        self.sliderBlacks.setRange(0,100)
-        self.sliderBlacks.setValue(int(self.controller.model.default['blacks'][1]))
+        self.sliderBlacks.setRange(0,10000)
+        self.sliderBlacks.setValue(int(self.controller.model.default['blacks'][1]) * 100)
         self.editBlacks = QLineEdit()
         self.editBlacks.setText(str(self.controller.model.default['blacks'][1]))
         self.resetBlacks = QPushButton("reset")
@@ -989,8 +989,8 @@ class ToneCurveView(QFrame):
         # mediums
         self.labelMediums = QLabel("mediums")
         self.sliderMediums = QSlider(Qt.Horizontal)
-        self.sliderMediums.setRange(0,100)
-        self.sliderMediums.setValue(int(self.controller.model.default['mediums'][1]))
+        self.sliderMediums.setRange(0,10000)
+        self.sliderMediums.setValue(int(self.controller.model.default['mediums'][1]) * 100)
         self.editMediums = QLineEdit()
         self.editMediums.setText(str(self.controller.model.default['mediums'][1]))
         self.resetMediums = QPushButton("reset")
@@ -1002,8 +1002,8 @@ class ToneCurveView(QFrame):
         # whites
         self.labelWhites = QLabel("  whites  ")
         self.sliderWhites = QSlider(Qt.Horizontal)
-        self.sliderWhites.setRange(0,100)
-        self.sliderWhites.setValue(int(self.controller.model.default['whites'][1]))
+        self.sliderWhites.setRange(0,10000)
+        self.sliderWhites.setValue(int(self.controller.model.default['whites'][1]) * 100)
         self.editWhites = QLineEdit()
         self.editWhites.setText(str(self.controller.model.default['whites'][1]))
         self.resetWhites = QPushButton("reset")
@@ -1015,8 +1015,8 @@ class ToneCurveView(QFrame):
         # highlights
         self.labelHighlights = QLabel("highlights")
         self.sliderHighlights = QSlider(Qt.Horizontal)
-        self.sliderHighlights.setRange(0,100)
-        self.sliderHighlights.setValue(int(self.controller.model.default['highlights'][1]))
+        self.sliderHighlights.setRange(0,10000)
+        self.sliderHighlights.setValue(int(self.controller.model.default['highlights'][1]) * 100)
         self.editHighlights = QLineEdit()
         self.editHighlights.setText(str(self.controller.model.default['highlights'][1]))
         self.resetHighlights = QPushButton("reset")
@@ -1044,31 +1044,31 @@ class ToneCurveView(QFrame):
 
     def sliderShadowsChange(self):
         if self.controller.callBackActive:
-            value = self.sliderShadows.value()
+            value = self.sliderShadows.value() / 100
             self.controller.sliderChange("shadows", value)
         pass
 
     def sliderBlacksChange(self):
         if self.controller.callBackActive:
-            value = self.sliderBlacks.value()
+            value = self.sliderBlacks.value() / 100
             self.controller.sliderChange("blacks", value)
         pass
 
     def sliderMediumsChange(self):
         if self.controller.callBackActive:
-            value = self.sliderMediums.value()
+            value = self.sliderMediums.value() / 100
             self.controller.sliderChange("mediums", value)
         pass
 
     def sliderWhitesChange(self):
         if self.controller.callBackActive:
-            value = self.sliderWhites.value()
+            value = self.sliderWhites.value() / 100
             self.controller.sliderChange("whites", value)
         pass
 
     def sliderHighlightsChange(self):
         if self.controller.callBackActive:
-            value = self.sliderHighlights.value()
+            value = self.sliderHighlights.value() / 100
             self.controller.sliderChange("highlights", value)
         pass
 

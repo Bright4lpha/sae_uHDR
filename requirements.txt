@@ -1,7 +1,7 @@
 PyQt5
 colour
 colour-science
-sklearn
+scikit-learn
 pathos
 geomdl
 rawpy
@@ -9,3 +9,4 @@ imageio
 scikit-image
 numba
 torch
+matplotlib

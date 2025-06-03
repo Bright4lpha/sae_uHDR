@@ -780,20 +780,20 @@ class ToneCurveController():
 
             self.callBackActive =  False
 
-            self.view.sliderShadows.setValue(newValues["shadows"][1])
-            self.view.editShadows.setText(str(newValues["shadows"][1]))
+            self.view.sliderShadows.setValue(int(newValues["shadows"][1]) * 100)
+            self.view.editShadows.setText(str(round(newValues["shadows"][1],2)))
 
-            self.view.sliderBlacks.setValue(newValues["blacks"][1])
-            self.view.editBlacks.setText(str(newValues["blacks"][1]))
+            self.view.sliderBlacks.setValue(int(newValues["blacks"][1]) * 100)
+            self.view.editBlacks.setText(str(round(newValues["blacks"][1],2)))
 
-            self.view.sliderMediums.setValue(newValues["mediums"][1])
-            self.view.editMediums.setText(str(newValues["mediums"][1]))
+            self.view.sliderMediums.setValue(int(newValues["mediums"][1]) * 100)
+            self.view.editMediums.setText(str(round(newValues["mediums"][1],2)))
 
-            self.view.sliderWhites.setValue(newValues["whites"][1])
-            self.view.editWhites.setText(str(newValues["whites"][1]))
+            self.view.sliderWhites.setValue(int(newValues["whites"][1]) * 100)
+            self.view.editWhites.setText(str(round(newValues["whites"][1],2)))
 
-            self.view.sliderHighlights.setValue(newValues["highlights"][1])
-            self.view.editHighlights.setText(str(newValues["highlights"][1]))
+            self.view.sliderHighlights.setValue(int(newValues["highlights"][1]) * 100)
+            self.view.editHighlights.setText(str(round(newValues["highlights"][1],2)))
 
             self.callBackActive =  True
     # -----------------------------------------------------------------------------
@@ -805,20 +805,20 @@ class ToneCurveController():
         self.model.setValues(valuesDict)
         points = self.model.evaluate()
 
-        self.view.sliderShadows.setValue(valuesDict["shadows"][1])
-        self.view.editShadows.setText(str(valuesDict["shadows"][1]))
+        self.view.sliderShadows.setValue(int(valuesDict["shadows"][1]) * 100)
+        self.view.editShadows.setText(str(round(valuesDict["shadows"][1],2)))
 
-        self.view.sliderBlacks.setValue(valuesDict["blacks"][1])
-        self.view.editBlacks.setText(str(valuesDict["blacks"][1]))
+        self.view.sliderBlacks.setValue(int(valuesDict["blacks"][1]) * 100)
+        self.view.editBlacks.setText(str(round(valuesDict["blacks"][1],2)))
 
-        self.view.sliderMediums.setValue(valuesDict["mediums"][1])
-        self.view.editMediums.setText(str(valuesDict["mediums"][1]))
+        self.view.sliderMediums.setValue(int(valuesDict["mediums"][1]) * 100)
+        self.view.editMediums.setText(str(round(valuesDict["mediums"][1],2)))
 
-        self.view.sliderWhites.setValue(valuesDict["whites"][1])
-        self.view.editWhites.setText(str(valuesDict["whites"][1]))
+        self.view.sliderWhites.setValue(int(valuesDict["whites"][1]) * 100)
+        self.view.editWhites.setText(str(round(valuesDict["whites"][1],2)))
 
-        self.view.sliderHighlights.setValue(valuesDict["highlights"][1])
-        self.view.editHighlights.setText(str(valuesDict["highlights"][1]))
+        self.view.sliderHighlights.setValue(int(valuesDict["highlights"][1])* 100)
+        self.view.editHighlights.setText(str(round(valuesDict["highlights"][1],2)))
 
         self.callBackActive = True
     # -----------------------------------------------------------------------------     
