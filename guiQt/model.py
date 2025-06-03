@@ -569,7 +569,10 @@ class HDRviewerModel(object):
         # current image
         self.currentIMG = None
 
-        self.displayModel = pref.getHDRdisplays()
+        display_name = getattr(pref, "HDRdisplay", "none")
+        display_config = getattr(pref, "HDRdisplays", {})
+        self.displayModel = display_config[display_name]
+
 
     def scaling(self): 
         if pref.verbose: print(f" [MODEL] >> HDRviewerModel.scaling():{self.displayModel['scaling']}")

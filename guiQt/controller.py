@@ -1118,7 +1118,7 @@ class LchColorSelectorController:
         # slider chroma selection
         v = values['selection']['chroma'] if 'chroma' in values['selection'].keys() else (0,100)
         self.view.sliderChromaMin.setValue(v[0])
-        self.view.sliderChromaMax.setValue(v[1])
+        self.view.sliderChromaMax.setValue(int(v[1]))
 
         # slider lightness
         v = values['selection']['lightness'] if 'lightness' in values['selection'].keys() else (0,100)
