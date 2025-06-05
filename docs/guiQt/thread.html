@@ -951,7 +951,7 @@
     parent (<a href="model.html#EditImageModel">guiQt.model.EditImageModel</a>): Reference to parent, used to callback parent when processing is over.
     requestDict (dict): Dictionary that stores editing values.
     pool (QThreadPool): Qt thread pool.
-    processpipe (hdrCore.processing.ProcessPipe): Active process pipe.
+    processpipe (<a href="../hdrCore/processing.html#ProcessPipe">hdrCore.processing.ProcessPipe</a>): Active process pipe.
     readyToRun (bool): True when no processing is ongoing, else False.
     waitingUpdate (bool): True if requestCompute has been called during a processing.</p>
 
@@ -1087,7 +1087,7 @@
             <div class="docstring"><p>Set the current active process pipe.</p>
 
 <p>Args:
-    pp (hdrCore.processing.ProcessPipe): The process pipe to set.</p>
+    pp (<a href="../hdrCore/processing.html#ProcessPipe">hdrCore.processing.ProcessPipe</a>): The process pipe to set.</p>
 </div>
 
 
@@ -1543,7 +1543,7 @@ If loading failed (IOError, ValueError) recall self.requestLoad().</p>
     error (bool): True if loading failed (take into account ValueError).
     idx0 (int): Image/process pipe index of first image in page.
     idx (int): Index of image/process pipe in the current page.
-    processPipe (hdrCore.processing.ProcessPipe): Process-pipe associated to loaded image.
+    processPipe (<a href="../hdrCore/processing.html#ProcessPipe">hdrCore.processing.ProcessPipe</a>): Process-pipe associated to loaded image.
     filename (str): Filename of image.</p>
 </div>
 
@@ -1841,7 +1841,7 @@ Calls parent.endLoadImage() when the process is over.</p>
     nbSplits (int): Number of image splits.
     nbDone (int): Number of splits for which the computation is over.
     geometryNode (hdrCore.process.ProcessNode): Geometry process node which computation is done at the end.
-    meta (hdrCore.metadata.metadata): Metadata of process pipe input image.</p>
+    meta (<a href="../hdrCore/metadata.html#metadata">hdrCore.metadata.metadata</a>): Metadata of process pipe input image.</p>
 
 <p>Methods:
     endCompute: Called when a split computation is finished.</p>
@@ -1911,7 +1911,7 @@ Calls parent.endLoadImage() when the process is over.</p>
     nbHeight (int): Number of vertical splits.
     toneMap (bool, optional): Whether to tone map the image. Defaults to True.
     progress (function, optional): Function called to display processing progress. Defaults to None.
-    meta (hdrCore.metadata.metadata, optional): Metadata of process pipe input image. Defaults to None.</p>
+    meta (<a href="../hdrCore/metadata.html#metadata">hdrCore.metadata.metadata</a>, optional): Metadata of process pipe input image. Defaults to None.</p>
 </div>
 
 
@@ -2637,7 +2637,7 @@ Calls parent.endCompute() when the process is over.</p>
     parent (<a href="model.html#EditImageModel">guiQt.model.EditImageModel</a>): Reference to parent, used to callback parent when processing is over.
     requestDict (dict): Dictionary that stores editing values.
     pool (QThreadPool): Qt thread pool.
-    processpipe (hdrCore.processing.ProcessPipe): Active process pipe.
+    processpipe (<a href="../hdrCore/processing.html#ProcessPipe">hdrCore.processing.ProcessPipe</a>): Active process pipe.
     readyToRun (bool): True when no processing is ongoing, else False.
     waitingUpdate (bool): True if requestCompute has been called during a processing.</p>
 
@@ -2773,7 +2773,7 @@ Calls parent.endCompute() when the process is over.</p>
             <div class="docstring"><p>Set the current active process pipe.</p>
 
 <p>Args:
-    pp (hdrCore.processing.ProcessPipe): The process pipe to set.</p>
+    pp (<a href="../hdrCore/processing.html#ProcessPipe">hdrCore.processing.ProcessPipe</a>): The process pipe to set.</p>
 </div>
 
 
