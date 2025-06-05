@@ -60,106 +60,164 @@ keepAllMeta = False
 # -----------------------------------------------------------------------------
 # --- Functions preferences --------------------------------------------------
 # -----------------------------------------------------------------------------
-def loadPref(): 
-    """load preferences file: prefs.json
-
-            Args:
-
-            Returns (Dict)
-        
+def loadPref():
     """
-    with open('./preferences/prefs.json') as f: return  json.load(f)
-# -----------------------------------------------------------------------------
+    Load preferences file: prefs.json
+
+    Args:
+        None
+
+    Returns:
+        dict: The loaded preferences.
+    """
+    with open('./preferences/prefs.json') as f:
+        return json.load(f)
+
 def savePref():
+    """
+    Save preferences to the preferences file: prefs.json
+
+    Args:
+        None
+
+    Returns:
+        None
+    """
     global HDRdisplays
     global HDRdisplay
     global imagePath
     pUpdate = {
-            "HDRdisplays" : HDRdisplays,
-            "HDRdisplay"  : HDRdisplay,
-            "imagePath"   : imagePath
-        }
-    if verbose: print(" [PREF] >> savePref(",pUpdate,")")
-    with open('./preferences/prefs.json', "w") as f: json.dump(pUpdate,f)
-# -----------------------------------------------------------------------------
-# -----------------------------------------------------------------------------
-# loading pref
-# -----------------------------------------------------------------------------
-# -----------------------------------------------------------------------------
+        "HDRdisplays": HDRdisplays,
+        "HDRdisplay": HDRdisplay,
+        "imagePath": imagePath
+    }
+    if verbose:
+        print(" [PREF] >> savePref(", pUpdate, ")")
+    with open('./preferences/prefs.json', "w") as f:
+        json.dump(pUpdate, f)
+
+# Loading preferences
 print("uHDRv6: loading preferences")
 p = loadPref()
-if p :
+if p:
     HDRdisplays = p["HDRdisplays"]
     HDRdisplay = p["HDRdisplay"]
     imagePath = p["imagePath"]
 else:
     HDRdisplays = {
-        'none' :                {'shape':(2160,3840), 'scaling':1,   'post':'',                          'tag': "none"},
-        'vesaDisplayHDR1000' :  {'shape':(2160,3840), 'scaling':12,  'post':'_vesa_DISPLAY_HDR_1000',    'tag':'vesaDisplayHDR1000'},
-        'vesaDisplayHDR400' :   {'shape':(2160,3840), 'scaling':4.8, 'post':'_vesa_DISPLAY_HDR_400',     'tag':'vesaDisplayHDR400'},
-        'HLG1' :                {'shape':(2160,3840), 'scaling':1,   'post':'_HLG_1',                    'tag':'HLG1'}
-        }
-    # current display
+        'none': {'shape': (2160, 3840), 'scaling': 1, 'post': '', 'tag': "none"},
+        'vesaDisplayHDR1000': {'shape': (2160, 3840), 'scaling': 12, 'post': '_vesa_DISPLAY_HDR_1000', 'tag': 'vesaDisplayHDR1000'},
+        'vesaDisplayHDR400': {'shape': (2160, 3840), 'scaling': 4.8, 'post': '_vesa_DISPLAY_HDR_400', 'tag': 'vesaDisplayHDR400'},
+        'HLG1': {'shape': (2160, 3840), 'scaling': 1, 'post': '_HLG_1', 'tag': 'HLG1'}
+    }
+    # Current display
     HDRdisplay = 'vesaDisplayHDR1000'
     imagePath = '.'
 print(f"       target display: {HDRdisplay}")
 print(f"       image path: {imagePath}")
-# -----------------------------------------------------------------------------
-# --- Functions computation ---------------------------------------------------
-# -----------------------------------------------------------------------------
+
 def getComputationMode():
-    """returns the preference computation mode: python, numba, cuda, ...
+    """
+    Returns the preference computation mode: python, numba, cuda, etc.
 
-        Args:
+    Args:
+        None
 
-        Returns (str)
+    Returns:
+        str: The computation mode.
     """
     return computation
-# -----------------------------------------------------------------------------
-# --- Functions HDR dispaly ---------------------------------------------------
-# -----------------------------------------------------------------------------
+
 def getHDRdisplays():
-    """returns the current display model
+    """
+    Returns the current display models.
 
     Args:
+        None
 
-    Returns (Dict)
+    Returns:
+        dict: The current display models.
     """
     return HDRdisplays
-# -----------------------------------------------------------------------------
+
 def getHDRdisplay():
-    """returns the current display model
+    """
+    Returns the current display model.
 
     Args:
+        None
 
-    Returns (Dict)
+    Returns:
+        dict: The current display model.
     """
     return HDRdisplays[HDRdisplay]
-# -----------------------------------------------------------------------------
+
 def setHDRdisplay(tag):
-    """set the HDR display
+    """
+    Set the HDR display.
 
-        Args:
-            tag (str): tag of HDR display, must be a key of HDRdisplays
+    Args:
+        tag (str): Tag of HDR display, must be a key of HDRdisplays.
 
-        Returns:
+    Returns:
+        None
     """
     global HDRdisplay
-    if tag in HDRdisplays: HDRdisplay =tag
+    if tag in HDRdisplays:
+        HDRdisplay = tag
     savePref()
-# ----------------------------------------------------------------------------
-def getDisplayScaling():  return getHDRdisplay()['scaling']
-# ----------------------------------------------------------------------------
-def getDisplayShape():  return getHDRdisplay()['shape']
-# -----------------------------------------------------------------------------
-# --- Functions path ---------------------------------------------------
-# -----------------------------------------------------------------------------
-def getImagePath(): return imagePath if os.path.isdir(imagePath) else '.'
-# ----------------------------------------------------------------------------
-def setImagePath(path): 
+
+def getDisplayScaling():
+    """
+    Returns the scaling factor of the current display.
+
+    Args:
+        None
+
+    Returns:
+        float: The scaling factor of the current display.
+    """
+    return getHDRdisplay()['scaling']
+
+def getDisplayShape():
+    """
+    Returns the shape of the current display.
+
+    Args:
+        None
+
+    Returns:
+        tuple: The shape of the current display.
+    """
+    return getHDRdisplay()['shape']
+
+def getImagePath():
+    """
+    Returns the current image path.
+
+    Args:
+        None
+
+    Returns:
+        str: The current image path.
+    """
+    return imagePath if os.path.isdir(imagePath) else '.'
+
+def setImagePath(path):
+    """
+    Set the image path.
+
+    Args:
+        path (str): The path to set.
+
+    Returns:
+        None
+    """
     global imagePath
     imagePath = path
-    if verbose: print(" [PREF] >> setImagePath(",path,"):",imagePath)
+    if verbose:
+        print(" [PREF] >> setImagePath(", path, "):", imagePath)
     savePref()
+
 # ----------------------------------------------------------------------------
              

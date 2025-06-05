@@ -35,112 +35,108 @@ import preferences.preferences as pref
 # -----------------------------------------------------------------------------
 class RequestCompute(object):
     """
-    manage parallel (multithreading) computation of processpipe.compute() when editing image (not used for display HDR or export HDR):
-        - uses a single/specific thread to compute process-pipe,
-        - store compute request when user changes editing values, restart process-pipe computing when the previous one is finished.
+    Manage parallel (multithreading) computation of processpipe.compute() when editing image (not used for display HDR or export HDR):
+    - Uses a single/specific thread to compute process-pipe.
+    - Stores compute request when user changes editing values, restarts process-pipe computing when the previous one is finished.
 
     Attributes:
-        parent (guiQt.model.EditImageModel): reference to parent, used to callback parent when processing is over.
-        requestDict (dict): dict that stores editing values.
+        parent (guiQt.model.EditImageModel): Reference to parent, used to callback parent when processing is over.
+        requestDict (dict): Dictionary that stores editing values.
         pool (QThreadPool): Qt thread pool.
-        processpipe (hdrCore.processing.Processpipe): active processpipe.
+        processpipe (hdrCore.processing.ProcessPipe): Active process pipe.
         readyToRun (bool): True when no processing is ongoing, else False.
         waitingUpdate (bool): True if requestCompute has been called during a processing.
 
     Methods:
-        setProcessPipe
-        requestCompute
-        endCompute
+        setProcessPipe: Set the current active process pipe.
+        requestCompute: Send new parameters for a process-node and request a new process pipe computation.
+        endCompute: Called when process-node computation is finished.
     """
 
     def __init__(self, parent):
+        """
+        Initialize the RequestCompute.
 
+        Args:
+            parent: Reference to the parent model.
+        """
         self.parent = parent
-
-        self.requestDict= {} # store resqustCompute key:processNodeId, value: processNode params
-
-        self.pool = QThreadPool.globalInstance()        # get global pool
-        self.processpipe = None                         # processpipe ref
-
+        self.requestDict = {}  # Store requestCompute key: processNodeId, value: processNode params
+        self.pool = QThreadPool.globalInstance()  # Get global pool
+        self.processpipe = None  # Process pipe reference
         self.readyToRun = True
         self.waitingUpdate = False
 
-    def setProcessPipe(self,pp):
-        """set the current active processpipe.
+    def setProcessPipe(self, pp):
+        """
+        Set the current active process pipe.
 
-            Args:
-                pp (hrdCore.processing.ProcessPipe, Required)
-
-            Returns:
-                
+        Args:
+            pp (hdrCore.processing.ProcessPipe): The process pipe to set.
         """
         self.processpipe = pp
-    
+
     def requestCompute(self, id, params):
-        """send new parameters for a process-node and request a new processpipe computation.
+        """
+        Send new parameters for a process-node and request a new process pipe computation.
 
-            Args:
-                id (int, Required): index of process-node in processpipe
-                params (dict, Required): parameters of process-node 
-
-            Returns:
-                
+        Args:
+            id (int): Index of process-node in process pipe.
+            params (dict): Parameters of process-node.
         """
         self.requestDict[id] = copy.deepcopy(params)
 
-
         if self.readyToRun:
-            # start processing processpipe
+            # Start processing process pipe
             self.pool.start(RunCompute(self))
         else:
-            # if a computation is already running
+            # If a computation is already running
             self.waitingUpdate = True
 
     def endCompute(self):
-        """called when process-node computation is finished.
-            Get processed image and send it to parent (guiQt.model.EditImageModel).
-            If there are new requestCompute, restart computation of processpipe
-
-        Args:
-
-        Retruns:
-
+        """
+        Called when process-node computation is finished.
+        Get processed image and send it to parent (guiQt.model.EditImageModel).
+        If there are new requestCompute, restart computation of process pipe.
         """
         imgTM = self.processpipe.getImage(toneMap=True)
         self.parent.updateImage(imgTM)
         if self.waitingUpdate:
             self.pool.start(RunCompute(self))
             self.waitingUpdate = False
-# -----------------------------------------------------------------------------
-# --- Class RunCompute --------------------------------------------------------
-# -----------------------------------------------------------------------------
-class RunCompute(QRunnable):
-    """defines the run method that executes on a dedicated thread: processpipe computation.
-    
-        Attributes:
-            parent (guiQt.thread.RequestCompute): parent called.endCompute() when processing is over.
 
-        Methods:
-            run
+class RunCompute(QRunnable):
     """
-    def __init__(self,parent):
+    Defines the run method that executes on a dedicated thread: process pipe computation.
+
+    Attributes:
+        parent (guiQt.thread.RequestCompute): Parent called endCompute() when processing is over.
+
+    Methods:
+        run: Method called by the Qt Thread pool.
+    """
+
+    def __init__(self, parent):
+        """
+        Initialize the RunCompute.
+
+        Args:
+            parent: Reference to the parent RequestCompute.
+        """
         super().__init__()
         self.parent = parent
 
     def run(self):
-        """method called by the Qt Thread pool.
-            Calls parent.endCompute() when process is over.
-
-            Args:
-
-            Returns:
-
+        """
+        Method called by the Qt Thread pool.
+        Calls parent.endCompute() when the process is over.
         """
         self.parent.readyToRun = False
-        for k in self.parent.requestDict.keys(): self.parent.processpipe.setParameters(k,self.parent.requestDict[k])
+        for k in self.parent.requestDict.keys():
+            self.parent.processpipe.setParameters(k, self.parent.requestDict[k])
         cpp = True
         if cpp:
-            img  = copy.deepcopy(self.parent.processpipe.getInputImage())
+            img = copy.deepcopy(self.parent.processpipe.getInputImage())
             imgRes = hdrCore.coreC.coreCcompute(img, self.parent.processpipe)
             self.parent.processpipe.setOutput(imgRes)
             self.parent.readyToRun = True
@@ -151,74 +147,86 @@ class RunCompute(QRunnable):
             dt = timer() - start
             self.parent.readyToRun = True
             self.parent.endCompute()
-# -----------------------------------------------------------------------------
-# --- Class RequestLoadImage --------------------------------------------------
-# -----------------------------------------------------------------------------
+
 class RequestLoadImage(object):
     """
-    manage parallel (multithreading) computation of loading images:
-        - uses a new thread to load each image.
-        - calls parent with process-pipe associated to loaded image
+    Manage parallel (multithreading) computation of loading images:
+    - Uses a new thread to load each image.
+    - Calls parent with process-pipe associated to loaded image.
+
     Attributes:
-        parent (guiQt.model.ImageGalleryModel): reference to parent, used to callback parent when processing is over.
+        parent (guiQt.model.ImageGalleryModel): Reference to parent, used to callback parent when processing is over.
         pool (QThreadPool): Qt thread pool.
-        requestsDone (Dict): key is index of image in page 
-            requestsDone[requestsDone]= True when image is loaded
+        requestsDone (dict): Key is index of image in page. requestsDone[requestsDone] = True when image is loaded.
 
     Methods:
-        requestLoad
-        endLoadImage
-
+        requestLoad: Request to load an image.
+        endLoadImage: Called when loading is over or failed (IOError, ValueError).
     """
 
     def __init__(self, parent):
+        """
+        Initialize the RequestLoadImage.
 
+        Args:
+            parent: Reference to the parent model.
+        """
         self.parent = parent
-        self.pool = QThreadPool.globalInstance()        # get a global pool
+        self.pool = QThreadPool.globalInstance()  # Get a global pool
         self.requestsDone = {}
 
     def requestLoad(self, minIdxInPage, imgIdxInPage, filename):
         """
-        Args:
-            minIdxInPage (int, Required): image/processpipe index of first image in page.
-            imgIdxInPage (int, Required): index of image/processpipe in the current page. 
-            filename     (str, Required): image filename.
+        Request to load an image.
 
-        Returns:
-            
+        Args:
+            minIdxInPage (int): Image/process pipe index of first image in page.
+            imgIdxInPage (int): Index of image/process pipe in the current page.
+            filename (str): Image filename.
         """
-        self.requestsDone[minIdxInPage+ imgIdxInPage] = False
-        self.pool.start(RunLoadImage(self,minIdxInPage, imgIdxInPage,filename))
+        self.requestsDone[minIdxInPage + imgIdxInPage] = False
+        self.pool.start(RunLoadImage(self, minIdxInPage, imgIdxInPage, filename))
 
-    def endLoadImage(self,error,idx0, idx,processPipe, filename):
-        """called when loading is over or failed (IOError, ValueError).
-            Set process-pipe into parent (guiQt.model.ImageGalleryModel) then update view.
-            If loading failed (IOError, ValueError) recall self.requestLoad()
+    def endLoadImage(self, error, idx0, idx, processPipe, filename):
+        """
+        Called when loading is over or failed (IOError, ValueError).
+        Set process-pipe into parent (guiQt.model.ImageGalleryModel) then update view.
+        If loading failed (IOError, ValueError) recall self.requestLoad().
 
         Args:
-            error           (bool, Required): True if loading failed (take into account ValueError).
-            idx0            (int, Required): image/processpipe index of first image in page.
-            idx             (int, Required): index of image/processpipe in the current page.
-            processPipe     (hrdCore.processing.ProcessPipe, Required):  process-pipe associated to loaded image.
-            filename        (str, Required): filename of image
-
-        Returns:
+            error (bool): True if loading failed (take into account ValueError).
+            idx0 (int): Image/process pipe index of first image in page.
+            idx (int): Index of image/process pipe in the current page.
+            processPipe (hdrCore.processing.ProcessPipe): Process-pipe associated to loaded image.
+            filename (str): Filename of image.
         """
         if not error:
             self.requestsDone[idx0 + idx] = True
-            self.parent.processPipes[idx0 + idx]= processPipe
-            self.parent.controller.view.updateImage(idx,processPipe, filename)
+            self.parent.processPipes[idx0 + idx] = processPipe
+            self.parent.controller.view.updateImage(idx, processPipe, filename)
         else:
             self.requestLoad(idx0, idx, filename)
-# -----------------------------------------------------------------------------
-# --- Class RunLoadImage ------------------------------------------------------
-# -----------------------------------------------------------------------------
-class RunLoadImage(QRunnable):
-    def __init__(self,parent, minIdxInPage, imgIdxInPage, filename):
-        """
-        Args:
 
-        Returns:
+class RunLoadImage(QRunnable):
+    """
+    Defines the run method that executes on a dedicated thread: image loading.
+
+    Attributes:
+        parent (guiQt.thread.RequestLoadImage): Parent called endLoadImage() when processing is over.
+        minIdxInPage (int): Image/process pipe index of first image in page.
+        imgIdxInPage (int): Index of image/process pipe in the current page.
+        filename (str): Filename of the image to load.
+    """
+
+    def __init__(self, parent, minIdxInPage, imgIdxInPage, filename):
+        """
+        Initialize the RunLoadImage.
+
+        Args:
+            parent: Reference to the parent RequestLoadImage.
+            minIdxInPage (int): Image/process pipe index of first image in page.
+            imgIdxInPage (int): Index of image/process pipe in the current page.
+            filename (str): Filename of the image to load.
         """
         super().__init__()
         self.parent = parent
@@ -228,158 +236,190 @@ class RunLoadImage(QRunnable):
 
     def run(self):
         """
-        Args:
-
-        Returns:
+        Method called by the Qt Thread pool.
+        Calls parent.endLoadImage() when the process is over.
         """
         try:
             image_ = hdrCore.image.Image.read(self.filename, thumb=True)
             processPipe = model.EditImageModel.buildProcessPipe()
-            processPipe.setImage(image_)                      
+            processPipe.setImage(image_)
             processPipe.compute()
             self.parent.endLoadImage(False, self.minIdxInPage, self.imgIdxInPage, processPipe, self.filename)
-        except(IOError, ValueError) as e:
+        except (IOError, ValueError) as e:
             self.parent.endLoadImage(True, self.minIdxInPage, self.imgIdxInPage, None, self.filename)
-# -----------------------------------------------------------------------------
-# --- Class pCompute ----------------------------------------------------------
-# -----------------------------------------------------------------------------
+
 class pCompute(object):
     """
-    manage parallel (multithreading) computation of processpipe.compute when display HDR image or export HDR image:
-        - the image is split into multiple parts (called splits), then multithreading processing is started for each split,
-        - when all  computations of the splits are over, the processed splits are merge (note that geometry processing computation is processed after merging)
-        - the parent callback function is called with the processed image (tone-mapped or not according to constructor parameters)
+    Manage parallel (multithreading) computation of processpipe.compute when displaying HDR image or exporting HDR image:
+    - The image is split into multiple parts (called splits), then multithreading processing is started for each split.
+    - When all computations of the splits are over, the processed splits are merged (note that geometry processing computation is processed after merging).
+    - The parent callback function is called with the processed image (tone-mapped or not according to constructor parameters).
 
     Attributes:
-        callBack (function): function called when processing is over.
-        progress (function): function called to display processing progress.
-        nbSplits (int): number of image splits
-        nbDone (int): for which the computation is over. 
-        geometryNode (hdrCore.process.ProcessNode): geometry process node which compuation is done at the end.
-        meta (hdrCore.metadata.metadata): metadata of processpipe input image.
+        callBack (function): Function called when processing is over.
+        progress (function): Function called to display processing progress.
+        nbSplits (int): Number of image splits.
+        nbDone (int): Number of splits for which the computation is over.
+        geometryNode (hdrCore.process.ProcessNode): Geometry process node which computation is done at the end.
+        meta (hdrCore.metadata.metadata): Metadata of process pipe input image.
 
     Methods:
-        endCompute
+        endCompute: Called when a split computation is finished.
     """
 
-    def __init__(self, callBack, processpipe,nbWidth,nbHeight, toneMap=True, progress=None, meta=None):
+    def __init__(self, callBack, processpipe, nbWidth, nbHeight, toneMap=True, progress=None, meta=None):
+        """
+        Initialize the pCompute.
+
+        Args:
+            callBack (function): Function called when processing is over.
+            processpipe: The process pipe to compute.
+            nbWidth (int): Number of horizontal splits.
+            nbHeight (int): Number of vertical splits.
+            toneMap (bool, optional): Whether to tone map the image. Defaults to True.
+            progress (function, optional): Function called to display processing progress. Defaults to None.
+            meta (hdrCore.metadata.metadata, optional): Metadata of process pipe input image. Defaults to None.
+        """
         self.callBack = callBack
-        self.progress =progress
-        self.nbSplits = nbWidth*nbHeight
+        self.progress = progress
+        self.nbSplits = nbWidth * nbHeight
         self.nbDone = 0
         self.geometryNode = None
         self.meta = meta
-        # recover and split image
-        input =  processpipe.getInputImage()
+        # Recover and split image
+        input = processpipe.getInputImage()
 
-        # store last processNode (geometry) and remove it from processpipe
-        if isinstance(processpipe.processNodes[-1].process,hdrCore.processing.geometry):
-            self.geometryNode = copy.deepcopy(processpipe.processNodes[-1]) 
+        # Store last process node (geometry) and remove it from process pipe
+        if isinstance(processpipe.processNodes[-1].process, hdrCore.processing.geometry):
+            self.geometryNode = copy.deepcopy(processpipe.processNodes[-1])
 
-            # remove geometry node (the last one) 
+            # Remove geometry node (the last one)
             processpipe.processNodes = processpipe.processNodes[:-1]
-       
-        # split image and store splited images
-        self.splits = input.split(nbWidth,nbHeight)
 
-        self.pool = QThreadPool.globalInstance() 
+        # Split image and store split images
+        self.splits = input.split(nbWidth, nbHeight)
 
-        # duplicate processpipe, set image split and start
-        for idxY,line in enumerate(self.splits):
-            for idxX,split in enumerate(line):
+        self.pool = QThreadPool.globalInstance()
+
+        # Duplicate process pipe, set image split and start
+        for idxY, line in enumerate(self.splits):
+            for idxX, split in enumerate(line):
                 pp = copy.deepcopy(processpipe)
                 pp.setImage(split)
-                # start compute
-                self.pool.start(pRun(self,pp,toneMap,idxX,idxY))
+                # Start compute
+                self.pool.start(pRun(self, pp, toneMap, idxX, idxY))
 
-    def endCompute(self,idx,idy, split):
+    def endCompute(self, idx, idy, split):
         """
+        Called when a split computation is finished.
+
         Args:
-
-        Returns:
-        
+            idx (int): X index of the split.
+            idy (int): Y index of the split.
+            split: The processed split.
         """
-        self.splits[idy][idx]= copy.deepcopy(split)
+        self.splits[idy][idx] = copy.deepcopy(split)
         self.nbDone += 1
         if self.progress:
-            percent = str(int(self.nbDone*100/self.nbSplits))+'%'
-            self.progress('HDR image process-pipe computation:'+percent)
+            percent = str(int(self.nbDone * 100 / self.nbSplits)) + '%'
+            self.progress('HDR image process-pipe computation:' + percent)
         if self.nbDone == self.nbSplits:
             res = hdrCore.image.Image.merge(self.splits)
-            # process geometry
+            # Process geometry
             if self.geometryNode:
-                res = self.geometryNode.process.compute(res,**self.geometryNode.params)
-            # callBack caller
+                res = self.geometryNode.process.compute(res, **self.geometryNode.params)
+            # Call back caller
             self.callBack(res, self.meta)
-# -----------------------------------------------------------------------------
-# --- Class pRun --------------------------------------------------------------
-# -----------------------------------------------------------------------------
+
 class pRun(QRunnable):
     """
-        Args:
+    Defines the run method that executes on a dedicated thread: split computation.
 
-        Returns:
-        
+    Attributes:
+        parent (guiQt.thread.pCompute): Parent called endCompute() when processing is over.
+        processpipe: The process pipe to compute.
+        idxX (int): X index of the split.
+        idxY (int): Y index of the split.
+        toneMap (bool): Whether to tone map the image.
     """
-    def __init__(self,parent,processpipe,toneMap, idxX,idxY):
+
+    def __init__(self, parent, processpipe, toneMap, idxX, idxY):
         """
+        Initialize the pRun.
+
+        Args:
+            parent: Reference to the parent pCompute.
+            processpipe: The process pipe to compute.
+            toneMap (bool): Whether to tone map the image.
+            idxX (int): X index of the split.
+            idxY (int): Y index of the split.
         """
         super().__init__()
         self.parent = parent
         self.processpipe = processpipe
-        self.idx = (idxX,idxY)
+        self.idx = (idxX, idxY)
         self.toneMap = toneMap
 
     def run(self):
         """
-        Args:
-
-        Returns:
-        
+        Method called by the Qt Thread pool.
+        Calls parent.endCompute() when the process is over.
         """
         self.processpipe.compute()
         pRes = self.processpipe.getImage(toneMap=self.toneMap)
-        self.parent.endCompute(self.idx[0],self.idx[1], pRes)
-# -----------------------------------------------------------------------------
-# -----------------------------------------------------------------------------
+        self.parent.endCompute(self.idx[0], self.idx[1], pRes)
 
-# -----------------------------------------------------------------------------
-# --- Class cCompute ----------------------------------------------------------
-# -----------------------------------------------------------------------------
 class cCompute(object):
-    """xxx
+    """
+    Manage parallel (multithreading) computation of processpipe.compute.
     """
 
     def __init__(self, callBack, processpipe, toneMap=True, progress=None):
+        """
+        Initialize the cCompute.
+
+        Args:
+            callBack (function): Function called when processing is over.
+            processpipe: The process pipe to compute.
+            toneMap (bool, optional): Whether to tone map the image. Defaults to True.
+            progress (function, optional): Function called to display processing progress. Defaults to None.
+        """
         self.callBack = callBack
-        self.progress =progress
+        self.progress = progress
 
-        # recover image
-        input =  processpipe.getInputImage()
+        # Recover image
+        input = processpipe.getInputImage()
 
-        self.pool = QThreadPool.globalInstance() 
-        self.pool.start(cRun(self,processpipe,toneMap))
+        self.pool = QThreadPool.globalInstance()
+        self.pool.start(cRun(self, processpipe, toneMap))
 
     def endCompute(self, img):
         """
-        Args:
+        Called when the computation is finished.
 
-        Returns:
-        
+        Args:
+            img: The processed image.
         """
         self.callBack(img)
-# -----------------------------------------------------------------------------
-# --- Class cRun --------------------------------------------------------------
-# -----------------------------------------------------------------------------
+
 class cRun(QRunnable):
     """
-        Args:
+    Defines the run method that executes on a dedicated thread: process pipe computation.
 
-        Returns:
-        
+    Attributes:
+        parent (guiQt.thread.cCompute): Parent called endCompute() when processing is over.
+        processpipe: The process pipe to compute.
+        toneMap (bool): Whether to tone map the image.
     """
-    def __init__(self,parent,processpipe,toneMap):
+
+    def __init__(self, parent, processpipe, toneMap):
         """
+        Initialize the cRun.
+
+        Args:
+            parent: Reference to the parent cCompute.
+            processpipe: The process pipe to compute.
+            toneMap (bool): Whether to tone map the image.
         """
         super().__init__()
         self.parent = parent
@@ -388,131 +428,119 @@ class cRun(QRunnable):
 
     def run(self):
         """
-        Args:
-
-        Returns:
-        
+        Method called by the Qt Thread pool.
+        Calls parent.endCompute() when the process is over.
         """
-        img  = copy.deepcopy(self.processpipe.getInputImage())
+        img = copy.deepcopy(self.processpipe.getInputImage())
         imgRes = hdrCore.coreC.coreCcompute(img, self.processpipe)
         self.processpipe.setOutput(imgRes)
 
         pRes = self.processpipe.getImage(toneMap=self.toneMap)
         self.parent.endCompute(pRes)
-# -----------------------------------------------------------------------------
-# -----------------------------------------------------------------------------
 
-# -----------------------------------------------------------------------------
-# --- Class RequestAestheticsCompute ----------------------------------------------------
-# -----------------------------------------------------------------------------
 class RequestAestheticsCompute(object):
     """
-    manage parallel (multithreading) computation of processpipe.compute() when editing image (not used for display HDR or export HDR):
-        - uses a single/specific thread to compute process-pipe,
-        - store compute request when user changes editing values, restart process-pipe computing when the previous one is finished.
+    Manage parallel (multithreading) computation of processpipe.compute() when editing image (not used for display HDR or export HDR):
+    - Uses a single/specific thread to compute process-pipe.
+    - Stores compute request when user changes editing values, restarts process-pipe computing when the previous one is finished.
 
     Attributes:
-        parent (guiQt.model.EditImageModel): reference to parent, used to callback parent when processing is over.
-        requestDict (dict): dict that stores editing values.
+        parent (guiQt.model.EditImageModel): Reference to parent, used to callback parent when processing is over.
+        requestDict (dict): Dictionary that stores editing values.
         pool (QThreadPool): Qt thread pool.
-        processpipe (hdrCore.processing.Processpipe): active processpipe.
+        processpipe (hdrCore.processing.ProcessPipe): Active process pipe.
         readyToRun (bool): True when no processing is ongoing, else False.
         waitingUpdate (bool): True if requestCompute has been called during a processing.
 
     Methods:
-        setProcessPipe
-        requestCompute
-        endCompute
+        setProcessPipe: Set the current active process pipe.
+        requestCompute: Send new parameters for a process-node and request a new process pipe computation.
+        endCompute: Called when process-node computation is finished.
     """
 
     def __init__(self, parent):
+        """
+        Initialize the RequestAestheticsCompute.
 
+        Args:
+            parent: Reference to the parent model.
+        """
         self.parent = parent
-
-        self.requestDict= {} # store resqustCompute key:processNodeId, value: processNode params
-
-        self.pool = QThreadPool.globalInstance()        # get global pool
-        self.processpipe = None                         # processpipe ref
-
+        self.requestDict = {}  # Store requestCompute key: processNodeId, value: processNode params
+        self.pool = QThreadPool.globalInstance()  # Get global pool
+        self.processpipe = None  # Process pipe reference
         self.readyToRun = True
         self.waitingUpdate = False
 
-    def setProcessPipe(self,pp):
-        """set the current active processpipe.
+    def setProcessPipe(self, pp):
+        """
+        Set the current active process pipe.
 
-            Args:
-                pp (hrdCore.processing.ProcessPipe, Required)
-
-            Returns:
-                
+        Args:
+            pp (hdrCore.processing.ProcessPipe): The process pipe to set.
         """
         self.processpipe = pp
-    
+
     def requestCompute(self, id, params):
-        """send new parameters for a process-node and request a new processpipe computation.
+        """
+        Send new parameters for a process-node and request a new process pipe computation.
 
-            Args:
-                id (int, Required): index of process-node in processpipe
-                params (dict, Required): parameters of process-node 
-
-            Returns:
-                
+        Args:
+            id (int): Index of process-node in process pipe.
+            params (dict): Parameters of process-node.
         """
         self.requestDict[id] = copy.deepcopy(params)
 
         if self.readyToRun:
-            # start processing processpipe
+            # Start processing process pipe
             self.pool.start(RunAestheticsCompute(self))
         else:
-            # if a computation is already running
+            # If a computation is already running
             self.waitingUpdate = True
 
     def endCompute(self):
-        """called when process-node computation is finished.
-            Get processed image and send it to parent (guiQt.model.EditImageModel).
-            If there are new requestCompute, restart computation of processpipe
-
-        Args:
-
-        Retruns:
-
+        """
+        Called when process-node computation is finished.
+        Get processed image and send it to parent (guiQt.model.EditImageModel).
+        If there are new requestCompute, restart computation of process pipe.
         """
         imgTM = self.processpipe.getImage(toneMap=True)
         self.parent.updateImage(imgTM)
         if self.waitingUpdate:
             self.pool.start(RunAestheticsCompute(self))
             self.waitingUpdate = False
-# -----------------------------------------------------------------------------
-# --- Class RunCompute --------------------------------------------------------
-# -----------------------------------------------------------------------------
-class RunAestheticsCompute(QRunnable):
-    """defines the run method that executes on a dedicated thread: processpipe computation.
-    
-        Attributes:
-            parent (guiQt.thread.RequestCompute): parent called.endCompute() when processing is over.
 
-        Methods:
-            run
+class RunAestheticsCompute(QRunnable):
     """
-    def __init__(self,parent):
+    Defines the run method that executes on a dedicated thread: process pipe computation.
+
+    Attributes:
+        parent (guiQt.thread.RequestCompute): Parent called endCompute() when processing is over.
+    """
+
+    def __init__(self, parent):
+        """
+        Initialize the RunAestheticsCompute.
+
+        Args:
+            parent: Reference to the parent RequestAestheticsCompute.
+        """
         super().__init__()
         self.parent = parent
 
     def run(self):
-        """method called by the Qt Thread pool.
-            Calls parent.endCompute() when process is over.
-
-            Args:
-
-            Returns:
-
+        """
+        Method called by the Qt Thread pool.
+        Calls parent.endCompute() when the process is over.
         """
         self.parent.readyToRun = False
-        for k in self.parent.requestDict.keys(): self.parent.processpipe.setParameters(k,self.parent.requestDict[k])
+        for k in self.parent.requestDict.keys():
+            self.parent.processpipe.setParameters(k, self.parent.requestDict[k])
         start = timer()
         self.parent.processpipe.compute()
         dt = timer() - start
         self.parent.readyToRun = True
         self.parent.endCompute()
+
 # -----------------------------------------------------------------------------
 # -----------------------------------------------------------------------------
