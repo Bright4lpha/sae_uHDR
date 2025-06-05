@@ -32,6 +32,12 @@ import torch.nn as nn
 # -----------------------------------------------------------------------------
 class Net(nn.Module):
     def __init__(self,n_feature, n_output):
+        """
+        Initialize the neural network with a linear layer followed by batch normalization and a sigmoid activation function.
+        Args:
+            n_feature (int): Number of input features.
+            n_output (int): Number of output features (should be 5 for this network).
+        """
         super(Net, self).__init__()
         self.layer = nn.Sequential(
             nn.Linear(n_feature, 5),
@@ -41,6 +47,12 @@ class Net(nn.Module):
     # -----------------------------------------------------------------------------
     def forward(self, x):
         """
+        Forward pass through the network.
+        
+        Args:
+            x (torch.Tensor): Input tensor of shape (batch_size, n_feature).
+        Returns:
+            torch.Tensor: Output tensor of shape (batch_size, 5).
         """
         return self.layer(x)
     

@@ -41,7 +41,7 @@ class ImageAestheticsModel():
     """class ImageAestheticsModel: abstract class for image aesthetics model
 
         Static methods:
-            build
+            build: create the ImageAestheticsModel from a processPipe
     """
     def build(processPipe, **kwargs): return ImageAestheticsModel()
 
@@ -71,8 +71,13 @@ class Palette(ImageAestheticsModel):
     # constructor
     def __init__(self, name, colors, colorSpace, type):
         """
-        constructor of aesthetics.Palette:
-
+        Constructor of Palette
+        
+        Args:
+            name (str): name of the palette
+            colors (numpy.ndarray): colors in the palette, shape (nbColors,3)
+            colorSpace (colour.models.RGB_COLOURSPACES): colorspace of the palette
+            type (image.imageType): image type (SDR|HDR)
         """
         self.name       = name
         self.colorSpace = colorSpace
@@ -138,6 +143,13 @@ class Palette(ImageAestheticsModel):
 
     def createImageOfPalette(self, colorWidth=100):
         """
+        Create an image of the palette
+        
+        Args:
+            colorWidth (int, Optional): width of each color in the palette image, default=100
+        
+        Returns:
+            (hdrCore.image.Image): image of the palette
         """
         if self.colorSpace.name =='Lab':
             if self.type == image.imageType.HDR :
@@ -185,22 +197,62 @@ class MultidimensionalImageAestheticsModel():
             1 - color palette
             2 - composition convex hull 
             3 - composition strength lines
+        
+        Attributes:
+            processpipe (hdrCore.processing.ProcessPipe): processpipe
+            processPipeChanged (bool): True if processpipe has changed
+            imageAestheticsModels (dict): dict of ImageAestheticsModel with key as name of the model
+        
+        Methods:
+            add: add an ImageAestheticsModel to the dict
+            get: get an ImageAestheticsModel from the dict
+            build: build an ImageAestheticsModel from a processpipe
     
     """
     def __init__(self, processpipe):
+        """
+        Constructor of MultidimensionalImageAestheticsModel
+        
+        Args:
+            processpipe (hdrCore.processing.ProcessPipe): processpipe
+        """
         self.processpipe = processpipe
         self.processPipeChanged = True
         self.imageAestheticsModels = {}
 
     def add(self, key, imageAestheticsModel):
+        """
+        add: add an ImageAestheticsModel to the dict
+        
+        Args:
+            key (str): key for the ImageAestheticsModel
+            imageAestheticsModel (hdrCore.aesthetics.ImageAestheticsModel): ImageAestheticsModel to add
+        """
         self.imageAestheticsModels[key] = imageAestheticsModel
 
     def get(self, key):
+        """
+        get: get an ImageAestheticsModel from the dict
+
+        Args:
+            key (str): key for the ImageAestheticsModel
+            
+        Returns:
+            (hdrCore.aesthetics.ImageAestheticsModel): ImageAestheticsModel corresponding to the key
+        """
         iam = None
         if key in self.imageAestheticsModels: iam = self.imageAestheticsModels[key]
         return iam
 
     def build(self, key, builder, processpipe):
+        """
+        build: build an ImageAestheticsModel from a processpipe and add it to the dict
+        
+        Args:
+            key (str or list): key for the ImageAestheticsModel or list of keys
+            builder (hdrCore.aesthetics.ImageAestheticsModel): ImageAestheticsModel builder
+            processpipe (hdrCore.processing.ProcessPipe): processpipe
+        """
         if not isintance(key,list):
             key, builder = [key],[builder]
         for k in key:

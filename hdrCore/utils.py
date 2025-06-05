@@ -106,21 +106,15 @@ def ndarray2vector(nda):
 
 def NPlinearWeightMask(x,xMin,xMax,xTolerance):
     """
-    TODO - Documentation de la méthode NPlinearWeightMask
-
+    Compute a linear weight mask for a 2D array based on specified minimum and maximum values with a tolerance.
+    This function reshapes the input array, applies the linear weight mask, and returns the modified array.
     Args:
-        x: TODO
-            TODO
-        xMin: TODO
-            TODO
-        xMax: TODO
-            TODO
-        xTolerance: TODO
-            TODO
-            
+        x (numpy.ndarray, Required): Input 2D array to apply the mask on.
+        xMin (float, Required): Minimum value for the mask.
+        xMax (float, Required): Maximum value for the mask.
+        xTolerance (float, Required): Tolerance value for the mask.
     Returns:
-        TODO
-            TODO
+        numpy.ndarray: A 2D array with the linear weight mask applied.
     """
     # reshape x
     h,w  = x.shape  # 2D array
@@ -136,19 +130,14 @@ def NPlinearWeightMask(x,xMin,xMax,xTolerance):
 
 def croppRotated(h,w,alpha):
     """
-    TODO - Documentation de la méthode croppRotated
-
+    Compute the size of the cropped rectangle after rotating an image by a given angle.
+    This function calculates the dimensions of the rectangle that remains after rotation, ensuring that the entire rectangle fits within the original dimensions.
     Args:
-        h: TODO
-            TODO
-        w: TODO
-            TODO
-        alpha: TODO
-            TODO
-            
+        h (float, Required): Height of the original rectangle.
+        w (float, Required): Width of the original rectangle.
+        alpha (float, Required): Angle of rotation in degrees.
     Returns:
-        TODO
-            TODO
+        (float, float): Dimensions of the cropped rectangle (height, width).
     """
 
     cosA = math.cos(math.radians(alpha))
