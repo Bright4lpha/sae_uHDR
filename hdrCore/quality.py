@@ -37,24 +37,24 @@ from . import utils, processing, image
 # -----------------------------------------------------------------------------
 class quality(object):
     """
-    TODO - Documentation de la classe quality
-    
+    Class representing the quality of an image.
+    This class contains attributes for image information, user details, scores, and artifacts.
     Attributes:
-        _image: TODO
-            TODO
-        imageNpath: TODO
-            TODO
-        user: TODO
-            TODO
-        score: TODO
-            TODO
-        artifact: TODO
-            TODO
+        _image (hdrCore.image.Image): The image object.
+        imageNpath (dict): Dictionary containing the name and path of the image.
+        user (dict): Dictionary containing user information, such as pseudo.
+        score (dict): Dictionary containing quality scores for various aspects.
+        artifact (dict): Dictionary indicating the presence of artifacts in the image.
+    Methods:
+        toDict(): Converts the object into a dictionary representation.
+        __repr__(): Returns a string representation of the object.
+        __str__(): Returns a string representation of the object.
+    
     """
     
     def __init__(self):
         """
-        TODO - Documentation de la méthode __init__
+        Initialize the quality object with default values.
         
         /!\ - Les constructeurs n'apparaissent pas dans la doc générées par sphinx.
         """
@@ -66,11 +66,10 @@ class quality(object):
 
     def toDict(self):
         """
-        Convert the object into a dict.
-        
+        Convert the quality object into a dictionary representation.
+        This method returns a dictionary containing the image name and path, user information, quality scores, and artifacts.
         Returns:
-            TODO
-                TODO
+            dict: A dictionary representation of the quality object.
         """
         return {'image': copy.deepcopy(self.imageNpath),
                               'user':copy.deepcopy(self.user),
@@ -83,7 +82,7 @@ class quality(object):
         
         Returns:
             str
-                TODO
+                A string representation of the quality object, formatted as a JSON string.
         """
         return str(self.toDict())
 
@@ -93,6 +92,6 @@ class quality(object):
         
         Returns:
             str
-                TODO
+                A string representation of the quality object, formatted as a JSON string.
         """
         return self.__repr__()

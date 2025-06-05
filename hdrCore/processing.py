@@ -171,7 +171,7 @@ class Processing(object):
 
     def compute(self,image,**kwargs):
         """
-        TODO - Documentation de la méthode compute
+        compute: compute processing on image.
 
         Args:
             image (hdrCore.image.Image, Required): input image
@@ -188,7 +188,18 @@ class Processing(object):
 # -----------------------------------------------------------------------------
 class tmo_cctf(Processing):
     """
-    TODO - Documentation de la classe tmo_cctf
+    CCTF tone mapping operator class.
+    This class implements a colorimetric tone mapping operator based on the CCTF (Color Component Transfer Function) encoding and decoding.
+    It allows to convert HDR images to SDR images using a specified color space function (e.g., sRGB).
+    Attributes:
+        None
+    Methods:
+        compute(img, **kwargs): 
+            Applies the CCTF tone mapping operator to the input HDR image.
+            The function parameter can be specified to choose the color space function for encoding.
+        auto(img):
+            Automatically computes the best exposure value (EV) for the input HDR image based on its luminance distribution.
+            It evaluates a range of EV values and selects the one that maximizes the cumulative histogram of luminance values.
     """
 
     def compute(self,img,**kwargs):
@@ -203,8 +214,8 @@ class tmo_cctf(Processing):
                 'function'          : 'sRGB'        str
                 
         Returns:
-            TODO
-                TODO
+            (hdrCore.image.Image): output image
+                result of CCTF tone mapping operator
         """
         function = 'sRGB'
         if 'function' in kwargs: function = kwargs['function']
@@ -230,7 +241,17 @@ class tmo_cctf(Processing):
 # -----------------------------------------------------------------------------
 class exposure(Processing):
     """
-    TODO - Documentation de la classe exposure
+    exposure operator class.
+    This class implements an exposure adjustment operator for HDR images.
+    It allows to modify the exposure value (EV) of an image, effectively brightening or darkening it.
+        
+    Methods:
+        compute(img, **kwargs): 
+            Applies the exposure adjustment to the input HDR image.
+            The EV parameter can be specified to control the amount of exposure adjustment.
+        auto(img):
+            Automatically computes the best exposure value (EV) for the input HDR image based on its luminance distribution.
+            It evaluates a range of EV values and selects the one that maximizes the cumulative histogram of luminance values.  
     """
     
     def compute(self,img,**kwargs):
@@ -286,15 +307,14 @@ class exposure(Processing):
 
     def auto(self,img):
         """
-        TODO - Documentation de la méthode auto
+        Automatically compute the best exposure value (EV) for the input HDR image based on its luminance distribution.
 
         Args:
-            img: TODO
-                TODO
+            img (hdrCore.image.Image, Required): input HDR image.
                 
         Returns:
-            TODO
-                TODO
+            (dict): a dictionary containing the best exposure value (EV) found for the image.
+                Example: {'EV': 2.5}
         """
         minEV, maxEV, step =  -10,10,0.25
         evs = np.linspace(minEV,maxEV,num=int((maxEV-minEV)/step)+1)
@@ -310,15 +330,13 @@ class exposure(Processing):
         # local method for pool (not static!)
         def evEval(ev):
             """
-            TODO - Documentation de la méthode evEval
+            This function computes the cumulative histogram of luminance values for a given exposure value (EV) by adjusting the RGB values of the image and converting them to XYZ color space.
 
             Args:
-                ev: TODO
-                    TODO
+                ev (float): The exposure value to be applied to the RGB values of the image.
                     
             Returns:
-                TODO
-                    TODO
+                float: The cumulative histogram value for the given exposure value (EV).
             """
             rgb_ev = rgbLinear*math.pow(2,ev)
             rgb_ev_prime = colour.cctf_encoding(rgb_ev,function='sRGB')
@@ -344,7 +362,13 @@ class exposure(Processing):
 # -----------------------------------------------------------------------------
 class contrast(Processing):
     """
-    TODO - Documentation de la classe contrast
+    contrast operator class.
+    This class implements a contrast adjustment operator for HDR images.
+    It allows to modify the contrast of an image by scaling the color data values.
+    Methods:
+        compute(img, **kwargs): 
+            Applies the contrast adjustment to the input HDR image.
+            The contrast parameter can be specified to control the amount of contrast adjustment.
     """
     
     def compute(self,img,**kwargs):
@@ -411,7 +435,13 @@ class contrast(Processing):
 # -----------------------------------------------------------------------------
 class clip(Processing):
     """
-    TODO - Documentation de la classe clip
+    clip operator class.
+    This class implements a clipping operator for HDR images.
+    It allows to clip the color data values of an image to a specified range.
+    Methods:
+        compute(img, **kwargs): 
+            Applies the clipping operation to the input HDR image.
+            The min and max parameters can be specified to define the clipping range.
     """
 
     def compute(self,img,**kwargs):
@@ -440,7 +470,13 @@ class clip(Processing):
 # -----------------------------------------------------------------------------
 class ColorSpaceTransform(Processing):
     """
-    TODO - Documentation de la colorspace transorm processing
+    Color space transform operator class.
+    This class implements a color space transformation operator for HDR images.
+    It allows to convert images between different color spaces such as sRGB, Lab, and XYZ.
+    Methods:
+        compute(img, **kwargs): 
+            Applies the color space transformation to the input HDR image.
+            The destination color space can be specified in the kwargs dictionary.
     """
 
     def compute(self,img,**kwargs):
@@ -450,11 +486,12 @@ class ColorSpaceTransform(Processing):
         Args:
             img (hdrCore.image.Image, Required)  : input image
             kwargs (dict,Optionnal) : parameters
-                TODO
+                'dest': str
+                    destination color space, can be 'sRGB', 'Lab', or 'XYZ'
                 
         Returns:
-            TODO
-                TODO
+            (hdrCore.image.Image, Required): output image
+                result of color space transformation
         """ 
         # first create a copy
         res = copy.deepcopy(img)
@@ -523,7 +560,14 @@ class ColorSpaceTransform(Processing):
 # -----------------------------------------------------------------------------
 class resize(Processing):
     """
-    TODO - Documentation de la classe Resize image processing
+    Resize operator class.
+    This class implements a resize operator for HDR images.
+    It allows to resize images to specified dimensions while maintaining the aspect ratio.
+    Methods:
+        compute(img, size=(None, None), anti_aliasing=False): 
+            Resizes the input HDR image to the specified size.
+            The size parameter can be a tuple of (width, height) or (None, None) to maintain the aspect ratio.
+            The anti_aliasing parameter can be set to True to apply anti-aliasing during resizing.
     """
     
     def compute(self,img, size=(None,None),anti_aliasing=False):
@@ -533,14 +577,15 @@ class resize(Processing):
         Args:
             img: hdrCore.image.Image
                 Required : hdr image
-            size: TODO
-                TODO
+            size: tuple
+                Optionnal : tuple of (width, height) or (None, None) to maintain aspect ratio
+                If size is (None, None), the image will be resized to a default height of 400 pixels while maintaining the aspect ratio.
             anti_aliasing: boolean
-                TODO
+                Optionnal : True to apply anti-aliasing during resizing, False otherwise.
                 
         Returns:
-            TODO
-                TODO
+            (hdrCore.image.Image, Required): output image
+                result of resize processing
         """
         res = copy.deepcopy(img)
         y, x, c =  tuple(res.colorData.shape)
@@ -567,7 +612,16 @@ class resize(Processing):
 # -----------------------------------------------------------------------------
 class Ycurve(Processing):
     """
-    TODO - Documentation de la classe Ycurve
+    Ycurve operator class.
+    
+    This class implements a Ycurve operator for HDR images.
+    It allows to apply a curve transformation to the luminance channel of an image, effectively adjusting the tonal response.
+    
+    Methods:
+        compute(img, **kwargs): 
+            Applies the Ycurve transformation to the input HDR image.
+            The control points for the curve can be specified in the kwargs dictionary.
+            Default control points are used if no kwargs are provided.
     """
     
     def compute(self,img,**kwargs):
@@ -656,7 +710,15 @@ class Ycurve(Processing):
 # -----------------------------------------------------------------------------
 class saturation(Processing):
     """
-    TODO - Documentation de la classe saturation
+    saturation operator class.
+    
+    This class implements a saturation adjustment operator for HDR images.
+    It allows to modify the saturation of an image by adjusting the chroma values in the Lch color space.
+    Methods:
+        compute(img, **kwargs): 
+            Applies the saturation adjustment to the input HDR image.
+            The saturation parameter can be specified to control the amount of saturation adjustment.
+            The method parameter must be 'gamma'.
     """
     
     def compute(self,img,**kwargs):
@@ -714,7 +776,15 @@ class saturation(Processing):
 # -----------------------------------------------------------------------------
 class colorEditor(Processing):
     """
-    TODO - Documentation de la classe colorEditor
+    colorEditor operator class.
+    This class implements a color editing operator for HDR images.
+    It allows to modify the hue, exposure, contrast, and saturation of specific color ranges in an image.
+    
+    Methods:
+        compute(img, **kwargs): 
+            Applies the color editing operation to the input HDR image.
+            The selection parameters (lightness, chroma, hue), tolerance, edit parameters (hue, exposure, contrast, saturation), and mask can be specified in the kwargs dictionary.
+            Default values are used if no kwargs are provided.
     """
     
     def compute(self,img, **kwargs):
@@ -879,7 +949,16 @@ class colorEditor(Processing):
 # -----------------------------------------------------------------------------
 class lightnessMask(Processing):
     """
-    TODO - Documentation de la classe lightnessMask
+    Lightness Mask operator class.
+    This class implements a lightness mask operator for HDR images.
+    It allows to create a mask based on the lightness values of the image, highlighting specific ranges such
+    as shadows 
+    
+    Methods:
+        compute(img, **kwargs): 
+            Applies the lightness mask to the input HDR image.
+            The kwargs dictionary can specify which ranges to highlight in the mask.
+            Default values are used if no kwargs are provided.
     """
     
     def compute(self, img, **kwargs):
@@ -887,15 +966,13 @@ class lightnessMask(Processing):
         Lightness Mask operator.
 
         Args:
-            img: hdrCore.image.Image
-                Required  : hdr image
-            kwargs: dict
-                Optionnal : parameters
-                TODO
+            img (hdrCore.image.Image, Required): input image
+            kwargs (dict, Optionnal): parameters
+                'shadows': bool
                 
         Returns:
-            TODO
-                TODO
+            (hdrCore.image.Image, Required): output image
+                result of lightnessMask processing
         """
         start = timer()
         defaultMask = { 'shadows': False, 'blacks': False, 'mediums': False, 'whites': False, 'highlights': False}
@@ -938,7 +1015,14 @@ class lightnessMask(Processing):
 # -----------------------------------------------------------------------------
 class geometry(Processing):
     """
-    TODO - Documentation de la classe geometry
+    geometry operator class.
+    This class implements a geometry operator for HDR images.
+    It allows to crop and rotate images based on specified parameters.
+    Methods:
+        compute(img, **kwargs): 
+            Applies the geometry operation to the input HDR image.
+            The ratio, up, and rotation parameters can be specified in the kwargs dictionary.
+            Default values are used if no kwargs are provided.
     """
     
     def compute(self, img, **kwargs): 
@@ -1078,26 +1162,51 @@ class ProcessPipe(object):
             self.outputImage = None # store results image (Image)
 
         def compute(self,img):
+            """compute: compute process on image
+            Args:
+                img (hdrCore.image.Image, Required): input image
+            Returns:
+                (hdrCore.image.Image, Required): output image
+                    result of process computation
+            """
 
             self.outputImage = self.process.compute(img,**self.params)
             self.requireUpdate = False
 
         def condCompute(self,img):
-
+            """condCompute: compute process only if requireUpdate is True
+            Args:
+                img (hdrCore.image.Image, Required): input image
+            Returns:
+                (hdrCore.image.Image, Required): output image
+                    result of process computation
+            """
            if self.requireUpdate: self.compute(img)
            pass
 
         def setParameters(self,paramDict):
+            """setParameters: set parameters of processNode
+            Args:
+                paramDict (dict, Required): parameters to set
+            """
 
             if pref.verbose: print(" [PROCESS] >> ProcessNode.setParameters(",self.name,"):",paramDict)
             self.params=paramDict
             self.requireUpdate = True
 
         def getParameters(self):
+            """getParameters: return parameters of processNode
+            Returns:
+                (dict): parameters of processNode
+            """
 
             return self.params
 
         def toDict(self):
+            """toDict: return parameters of processNode as dict
+            Returns:
+                (dict): parameters of processNode
+            """
 
             return {self.name: self.params}
     # -------------------------------------------------------------------------
@@ -1106,7 +1215,34 @@ class ProcessPipe(object):
     
     def __init__(self):
         """
-        TODO - Documentation de la méthode __init__
+        ProcessPipe: pipeline of process nodes
+        This class defines a pipeline of image processing objects.
+        Attributes:
+            originalImage (hdrCore.image.Image): 
+                original image before processing
+            __inputImage (hdrCore.image.Image): 
+                input image for processing
+            __outputImage (hdrCore.image.Image): 
+                output image after processing
+            processNodes ([ProcessNode]): 
+                list of process nodes in the pipeline
+            previewHDR (bool): 
+                flag to indicate if HDR preview is enabled
+            previewHDR_process (): 
+                process for HDR preview
+        
+        Methods:
+            append:                 (int) append a process node (ProcessNode) to process pipe (self)
+            getName:                (str) return image name associated to processpipe
+            setImage:               ()
+            getInputImage           ()
+            getImage                ()
+            setOutput               ()
+            getProcessNodeByName    ()
+            setParameters           ()
+            updateProcessPipeMetadata ()
+            updateHDRuseCase        ()
+            export                  ()
         
         /!\ - Les constructeurs n'apparaissent pas dans la doc générées par sphinx.
         """
@@ -1120,19 +1256,20 @@ class ProcessPipe(object):
 
     def append(self,process,paramDict=None,name=None):
         """
-        TODO - Documentation de la méthode append
+        append: append a process to the process pipe.
+        This method adds a new process to the process pipe.
 
         Args:
-            process: TODO
-                TODO
-            paramDict: TODO
-                TODO
-            name: TODO
-                TODO
+            process (hdrCore.processing.Processing, Required):
+                process to append to the process pipe.
+            paramDict (dict, Optionnal):
+                parameters for the process, if any.
+            name (str, Optionnal):
+                name of the process node, if not provided a default name is generated.
                 
         Returns:
-            TODO
-                TODO
+            (int): index of the appended process in the processNodes list.
+                This index can be used to reference the process later.
         """
         if isinstance(process,Processing): process = ProcessPipe.ProcessNode(process,paramDict,name) # encapsulate process in processNode
         self.processNodes.append(process)
@@ -1157,9 +1294,9 @@ class ProcessPipe(object):
 
         Args:
             img (hdrCore.image.Image, Required) : input image
-
-        Returns:
             
+        Returns:
+            None            
         """
         if pref.verbose: print(" [PROCESS] >> ProcessPipe.setImage(",img.name,")")
 
@@ -1232,15 +1369,17 @@ class ProcessPipe(object):
 
     def getImage(self,toneMap=True):
         """
-        TODO - Documentation de la méthode getImage
+        getImage: return the output image of the process pipe.
+        This method returns the output image of the process pipe, applying any necessary color space transformations
 
         Args:
-            toneMap: TODO
-                TODO
+            toneMap (bool, Optionnal):
+                If True, applies tone mapping to the output image.
+                Default is True.
                 
         Returns:
-            TODO
-                TODO
+            (hdrCore.image.Image, Required): output image
+                The processed image after applying the process pipe.
         """
         if isinstance(self.originalImage, image.Image): # if pipe has an image
             # conditionnal encoding or decoding to prime, linear
@@ -1282,7 +1421,7 @@ class ProcessPipe(object):
             progress: (object with showMessage and repaint method) object used to display progress
 
         Returns:
-                
+            None
         """
         if self.__inputImage:
 
@@ -1308,13 +1447,14 @@ class ProcessPipe(object):
 
     def setParameters(self,id,paramDicts):
         """
-        TODO - Documentation de la méthode setParameters
+        setParameters: set parameters for a specific process node in the process pipe.
+        This method updates the parameters of a specific process node in the process pipe.
 
         Args:
-            id: TODO
-                TODO
-            paramDicts: TODO
-                TODO
+            id (int, Required):
+                Index of the process node in the processNodes list.
+            paramDicts (dict, Required):
+                Dictionary of parameters to set for the specified process node.
         """
         self.processNodes[id].setParameters(paramDicts)
         for processNode in self.processNodes[id:]: processNode.requireUpdate = True
@@ -1322,29 +1462,28 @@ class ProcessPipe(object):
 
     def getParameters(self,id):
         """
-        TODO - Documentation de la méthode getParameters
-
+        getParameters: return parameters of a specific process node in the process pipe.
+        This method retrieves the parameters of a specific process node in the process pipe.
         Args:
-            id: TODO
-                TODO
-                
+            id (int, Required):
+                Index of the process node in the processNodes list.
         Returns:
-            TODO
-                TODO
+            (dict): 
+                Dictionary of parameters for the specified process node.
         """
         return self.processNodes[id].getParameters()
 
     def getProcessNodeByName(self,name):
         """
-        TODO - Documentation de la méthode getProcessNodeByName
-
+        getProcessNodeByName: return the index of a process node by its name.
+        This method searches for a process node in the processNodes list by its name and returns its index.
         Args:
-            name: TODO
-                TODO
-                
+            name (str, Required):
+                Name of the process node to search for.
         Returns:
-            TODO
-                TODO
+            (int): 
+                Index of the process node in the processNodes list.
+                Returns -1 if the process node with the specified name is not found.
         """
         id = -1
         for i, process in enumerate(self.processNodes):
@@ -1355,11 +1494,12 @@ class ProcessPipe(object):
 
     def __repr__(self):
         """
-        TODO - Documentation de la méthode __repr__
-                
+        __repr__: return a string representation of the ProcessPipe object.
+        This method provides a detailed representation of the ProcessPipe object, including the input image and the list of process nodes with their parameters and update status.
+        
         Returns:
-            TODO
-                TODO
+            (str): 
+                String representation of the ProcessPipe object.
         """
         res =   "<class ProcessPipe: \n"+ \
                 "\t inputImage: "
@@ -1373,21 +1513,21 @@ class ProcessPipe(object):
 
     def __str__(self):
         """
-        TODO - Documentation de la méthode __str__
-                
+        __str__: return a string representation of the ProcessPipe object.
+        This method provides a concise representation of the ProcessPipe object, similar to __repr__.
         Returns:
-            TODO
-                TODO
+            (str): 
+                String representation of the ProcessPipe object.
         """
         return self.__repr__()
 
     def toDict(self):
         """
-        TODO - Documentation de la méthode toDict
-                
+        toDict: return a list of dictionaries representing the process nodes in the process pipe.
+        This method converts each process node in the processNodes list to a dictionary format, allowing for easy serialization or inspection of the process pipe's structure.
         Returns:
-            TODO
-                TODO
+            (list): 
+                List of dictionaries, each representing a process node in the process pipe.
         """
         res = []
         for p in self.processNodes: res.append(p.toDict())
@@ -1395,7 +1535,13 @@ class ProcessPipe(object):
 
     def updateProcessPipeMetadata(self):
         """
-        TODO - Documentation de la méthode updateProcessPipeMetadata
+        updateProcessPipeMetadata: update the metadata of the process pipe.
+        This method updates the metadata of the process pipe by adding a 'processpipe' entry to the metadata of the original, input, and output images.
+        It includes a copy of the current process pipe's metadata in each image's metadata.
+        Args:
+            None
+        Returns:
+            None
         """
         ppMeta = self.toDict()
         if pref.verbose: print(" [PROCESS] >> ProcessPipe.updateMetadata(","):",ppMeta)
@@ -1405,11 +1551,16 @@ class ProcessPipe(object):
 
     def updateUserMeta(self,tagRootName,meta):
         """
-        TODO - Documentation de la méthode updateUserMeta
-
+        updateUserMeta: update user metadata in the process pipe.
+        This method updates the user metadata in the original, input, and output images of the process pipe.
+        It adds or updates the specified tagRootName with the provided meta data in the metadata of each image.
         Args:
-            hdrmeta: TODO
-                TODO
+            tagRootName (str, Required):
+                The root name of the metadata tag to update.
+            meta (dict, Required):
+                The metadata to set for the specified tagRootName.
+        Returns:
+            None
         """
         if pref.verbose: print(" [PROCESS] >> ProcessPipe.updateUserMeta(",")")
         if isinstance(self.originalImage,image.Image):  self.originalImage.metadata.metadata[tagRootName] =   copy.deepcopy(meta)
@@ -1418,16 +1569,24 @@ class ProcessPipe(object):
 
     def export(self,dirName,size=None,to=None,progress=None):
         """
-        TODO - Documentation de la méthode export
-
+        export: export the processed image to a file.
+        This method exports the processed image to a specified directory, applying any necessary resizing and tone mapping.
         Args:
-            dirName: TODO
-            size: TODO
-            to: TODO
-            progress: TODO
-                
+            dirName (str, Required):
+                Directory where the processed image will be saved.
+            size (tuple, Optionnal):
+                Size to resize the image before exporting, if specified.
+                Default is None, meaning no resizing.
+            to (dict, Optionnal):
+                Dictionary containing scaling and tag information for the export.
+                Default is None, meaning no specific scaling or tagging.
+            progress (object, Optionnal):
+                Object with showMessage and repaint methods for displaying progress.
+                Default is None, meaning no progress display.
         Returns:
-            (hdrCore.image.Image)
+            (hdrCore.image.Image, Required): 
+                The processed image after applying the process pipe.
+                The image is returned after processing and exporting.
         """
         # recover input and processpipe metadata
         input = copy.deepcopy(self.originalImage)

@@ -34,10 +34,10 @@ def numba_cctf_sRGB_encoding(L):
     """cctf SRGB encoding (numba acceleration)
 
         Args:
-            L (float or numpy.ndarray, Required)
+            L (float or numpy.ndarray) : luminance value in [0,1] range
 
         Returns:
-            (float)
+            (float) : encoded value in [0,1] range
     """
     v = np.where(L <= 0.0031308, L * 12.92, 1.055 * np.power(L, 1 / 2.4) - 0.055)
     return v
@@ -47,10 +47,10 @@ def numba_cctf_sRGB_decoding(V):
     """cctf SRGB decoding (numba acceleration)
 
         Args:
-            V (float or numpy.ndarray, Required)
+            V (float or numpy.ndarray) : encoded value in [0,1] range
 
         Returns:
-            (float)
+            (float) : luminance value in [0,1] range
     """
     L = np.where(V <= numba_cctf_sRGB_encoding(0.0031308), V / 12.92, np.power((V + 0.055) / 1.055, 2.4))
     return L
@@ -63,10 +63,10 @@ def cuda_cctf_sRGB_decoding(V):
     """cctf sRGB decoding (cuda acceleration)
 
         Args:
-            V (float or numpy.ndarray, Required)
+            V (float or numpy.ndarray) : encoded value in [0,1] range
 
         Returns:
-            (float)
+            (float) : luminance value in [0,1] range
     """
 
     if V <= 0.040449935999999999:
@@ -80,10 +80,10 @@ def cuda_cctf_sRGB_encoding(L):
     """cctf SRGB encoding (cuda acceleration)
 
         Args:
-            L (float or numpy.ndarray, Required)
+            L (float or numpy.ndarray) : luminance value in [0,1] range
 
         Returns:
-            (float)
+            (float) : encoded value in [0,1] range
     """
 
     if L <= 0.0031308:

@@ -45,6 +45,11 @@ class tags:
             self.tags = {'no-tag':[]}
     # ---------------------------------------------------------------------------
     def getTagsRootName(self):
+        """
+        Return the root name of the tags.
+        Returns:
+            str: the root name of the tags.
+        """
         return list(self.tags.keys())[0]
     # ---------------------------------------------------------------------------
 
@@ -60,10 +65,8 @@ class metadata:
     the processes to apply on the image.
     
     Atributes:
-        metadata: TODO
-            TODO
-        image: TODO
-            TODO
+        metadata (dict): a dictionary containing the metadata of the image
+        image (hdrCore.image.Image): the image object associated with the metadata
     """
 
     # colorspace used if unknown oe undefined color space
@@ -71,13 +74,13 @@ class metadata:
 
     def __init__(self,_image):
         """
-        TODO - Documentation de la méthode __init__
+        Create a metadata object from an image object. The metadata object contains the metadata of the image.
         
         /!\ - Les constructeurs n'apparaissent pas dans la doc générées par sphinx.
 
         Args:
-            _image: TODO
-                TODO
+            _image (hdrCore.image.Image):
+                The image object for which the metadata is created.
         """
 
         self.metadata =  {
@@ -139,12 +142,12 @@ class metadata:
         Build metadata object from an image.
 
         Args:
-            _image: TODO
-                TODO
+            _image (hdrCore.image.Image):
+                The image object for which the metadata is created.
                 
         Returns:
-            TODO
-                TODO
+            metadata: 
+                An instance of the metadata class containing the metadata of the image.
         """
 
         res = metadata(_image)
@@ -198,8 +201,8 @@ class metadata:
                 Name of the image file.
                 
         Returns:
-            TODO
-                TODO
+            dict: 
+                A dictionary containing the exif metadata of the image.
         """
         exifDict = dict()
         if os.path.isfile(filename): # check if filename exists
@@ -226,11 +229,11 @@ class metadata:
     # ---------------------------------------------------------------------------
     def recoverData(self,exif):
         """
-        TODO - Documentation de la méthode recoverData
+        Recover data from exif metadata and store them in the metadata object.
 
         Args:
-            exif: TODO
-                TODO
+            exif: dict
+                A dictionary containing the exif metadata of the image.
         """
 
         # data from exif
@@ -330,8 +333,8 @@ class metadata:
         Convert the metadata in string.
         
         Returns:
-            str
-                The metadata in a string format.
+            (str):
+                The metadata in a string format, formatted as JSON.
         """
         return json.dumps(self.metadata)
     # ---------------------------------------------------------------------------
@@ -340,8 +343,8 @@ class metadata:
         Convert the metadata in string.
         
         Returns:
-            str
-                The metadata in a string format.
+            (str):
+                The metadata in a string format, formatted as JSON.
         """
         return self.__repr__()
 # ---------------------------------------------------------------------------
