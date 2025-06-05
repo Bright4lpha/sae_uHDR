@@ -1181,8 +1181,9 @@ class ProcessPipe(object):
                 (hdrCore.image.Image, Required): output image
                     result of process computation
             """
-           if self.requireUpdate: self.compute(img)
-           pass
+            if self.requireUpdate: 
+                self.compute(img)
+                pass
 
         def setParameters(self,paramDict):
             """setParameters: set parameters of processNode
